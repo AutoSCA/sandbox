@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import { runSandbox } from './src/app.js';
+import { ensureGrypeDb } from './src/scanner/grype/grypeScanner.js';
 import { readDynamo } from './src/utils/readDynamo.js';
 
 dotenv.config({ quiet: true });
@@ -8,6 +9,7 @@ dotenv.config({ quiet: true });
 const POLL_INTERVAL_MS = Number(process.env.POLL_INTERVAL_MS) || 5000;
 const MAX_CONCURRENT_JOBS = Number(process.env.MAX_CONCURRENT_JOBS) || 3;
 const ENABLE_LOG = String(process.env.ENABLE_LOG ?? 'true').toLowerCase() === 'true';
+const GRYPE_DB_REFRESH_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6시간마다 단독으로 Grype DB 최신화
 
 const log = (...args) => { if (ENABLE_LOG) console.log(...args); };
 const logError = (...args) => { if (ENABLE_LOG) console.error(...args); };
@@ -58,6 +60,21 @@ log('====================================================');
 log(' SCA Sandbox Worker Server 시작');
 log(` DynamoDB 폴링 주기: ${POLL_INTERVAL_MS / 1000}초 | 최대 동시 작업 수: ${MAX_CONCURRENT_JOBS}건`);
 log('====================================================');
+
+// 서버 시작 시 Grype DB 상태 단독 검증/복구 후 폴링 시작 (병렬 스캔 중 DB 충돌 원천 방지)
+try {
+    await ensureGrypeDb({ checkUpdate: true, log });
+}
+catch (error) {
+    logError('[server] 초기 Grype DB 점검 실패 (스캔 시 자동 복구 재시도 예정):', error.message);
+}
+
+// 6시간마다 실행 중인 Grype 스캔 완료 후 단독으로 DB 최신화
+setInterval(() => {
+    ensureGrypeDb({ checkUpdate: true, log }).catch((error) => {
+        logError('[server] 주기적 Grype DB 갱신 실패:', error.message);
+    });
+}, GRYPE_DB_REFRESH_INTERVAL_MS);
 
 // 서버 시작 시 즉시 1회 확인 후 주기적 폴링 실행
 await pollPendingJobs();
