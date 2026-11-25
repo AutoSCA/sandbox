@@ -1,0 +1,27 @@
+{
+  "name": "gachon-p-project-sca-sandbox-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "setup": "node scripts/install-scanners.mjs",
+    "setup:force": "node scripts/install-scanners.mjs --force",
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1165.0",
+    "@aws-sdk/client-s3": "^3.1165.0",
+    "@aws-sdk/lib-dynamodb": "^3.1165.0",
+    "adm-zip": "^0.6.1",
+    "dotenv": "^18.0.3",
+    "express": "^5.2.1",
+    "mysql2": "^3.24.4",
+    "nodemon": "^3.1.14",
+    "pdfkit": "^0.20.2"
+  }
+}

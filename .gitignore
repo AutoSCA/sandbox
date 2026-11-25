@@ -1,0 +1,27 @@
+# 환경 변수 (시크릿 포함 - 절대 커밋 금지)
+.env
+.env.*
+!.env.example
+
+# 의존성
+node_modules/
+
+# 런타임 임시/출력 폴더
+downloads/
+results/
+
+# 스캐너 바이너리 (npm run setup 으로 자동 설치)
+src/scanner/osv-scanner/osv-scanner
+src/scanner/osv-scanner/osv-scanner.exe
+src/scanner/grype/grype
+src/scanner/grype/grype.exe
+src/scanner/trivy/trivy
+src/scanner/trivy/trivy.exe
+*.exe
+
+# 임시/OS 파일
+*.zip
+*.tar.gz
+*.pdf
+.DS_Store
+Thumbs.db
